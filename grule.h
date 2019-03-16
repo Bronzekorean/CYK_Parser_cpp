@@ -14,7 +14,6 @@ public:
     symbol_list expansion;
     gRule(gSymbol gsymbol, symbol_list expansion);
     gRule();
-    ~gRule();
 };
 
 bool operator==(const gRule& lhs, const gRule& rhs);

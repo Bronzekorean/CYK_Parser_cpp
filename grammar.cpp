@@ -38,7 +38,7 @@ rule_list remove_unit_rules(rule_list rules) {
         out.push_back(gRule((*it).gsymbol, expansion));
     }
 
-    rule_list temp = rule_list();
+    rule_list temp;
     for (auto it = out.begin(); it != out.end(); ++it) {
         gSymbol symbol_to_map = (*it).gsymbol;
         if (nt_to_nt.find(symbol_to_map) != nt_to_nt.end()) {
@@ -71,6 +71,15 @@ rule_list remove_non_solitary_terminals(gRule rule){
     }
     return out;
 }
+
+
+
+// TODO: Returned gRule instances go out of scope.
+// TODO: gRule destructor shouldn't delete inner array
+
+
+
+
 rule_list remove_more_than_2NT(gRule rule){
     // we asumme the rule have no solitary terminals
     rule_list out = rule_list();
@@ -224,6 +233,8 @@ rule_list rules_from_line(std::string line, bool chomsky_normalise){
         }
         out.push_back(gRule(root, expansion));
     }
+
+    delete[] symbols.array;
 
     if(chomsky_normalise){
         out = remove_unit_rules(out);

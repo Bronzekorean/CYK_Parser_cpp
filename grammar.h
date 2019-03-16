@@ -19,7 +19,7 @@ struct rule_logProba {
 };
 
 
-class PCFG {
+struct PCFG {
     bool verbose;
     bool to_lower;
     std::unordered_map<gRule, size_t> count_rules;
@@ -32,7 +32,6 @@ class PCFG {
     void update();
 
     PCFG (std::string* corpus, size_t corpus_length, bool verbose, bool to_lower, bool chomsky_normalize);
-    ~PCFG();
 };
 
 rule_list remove_unit_rules(rule_list rules);
