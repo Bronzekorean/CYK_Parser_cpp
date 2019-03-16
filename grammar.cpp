@@ -11,6 +11,7 @@
 #include <sstream>
 #include <iterator>
 #include <unordered_map>
+#include <stack>
 
 
 
@@ -176,15 +177,65 @@ int_list level_list(std::string line) {
     std::vector<std::string> symbols = split(line, ' ');
     out.size = symbols.size();
     out.array = new int[out.size];
+    size_t i = 0;
     for(auto it = symbols.begin(); it != symbols.end(); ++it){
-        out.array[it - symbols.begin()] = level;
+        out.array[i] = level;
         if((*it).find('(') != std::string::npos ) ++level;
         else level -= std::count((*it).begin(), (*it).end(), ')');
+        ++i;
     }
     return out;
 }
 
 rule_list rules_from_line(std::string line, bool chomsky_normalise){
+    std::unordered_map<int, std::vector<int>> tree = std::unordered_map<int, std::vector<int>>();
+    int_list levels = level_list(line);
+    std::stack<int> lvl_stack = std::stack<int>();
+    lvl_stack.push(levels.array[levels.size - 1]);
+    for( size_t i = levels.size - 2; i > 0; --i){
+        while(! lvl_stack.empty() && lvl_stack.top() == levels.array[i] + 1){
+            if(tree.find(i) == tree.end()) tree[i] = std::vector<int>();
+            tree[i].push_back(lvl_stack.top());
+            lvl_stack.pop();
+        }
+        lvl_stack.push(i);
+    }
 
+    std::vector<std::string> line_split= split(line, ' ');
+    symbol_list symbols;
+    symbols.size = line_split.size();
+    symbols.array = new gSymbol[symbols.size];
+    size_t i = 0;
+    for(auto it = line_split.begin(); it != line_split.end(); ++it){
+        symbols.array[i] = gSymbol(*it);
+        ++i;
+    }
 
+    rule_list out = rule_list();
+    for( auto& it : tree){
+        gSymbol root = symbols.array[it.first];
+        symbol_list expansion;
+        expansion.size = it.second.size();
+        expansion.array = new gSymbol[expansion.size];
+        i = 0;
+        for(auto it1 = it.second.begin(); it1 != it.second.end(); ++it1){
+            expansion.array[i] = symbols.array[*it1];
+            ++i;
+        }
+        out.push_back(gRule(root, expansion));
+    }
+
+    if(chomsky_normalise){
+        out = remove_unit_rules(out);
+        rule_list temp;
+        for(auto it = out.begin(); it != out.end(); ++it){
+            rule_list temp2 = remove_non_solitary_terminals(*it);
+            temp.insert(temp.end(), temp2.begin(), temp2.end());
+            temp2 = remove_more_than_2NT(*it);
+            temp.insert(temp.end(), temp2.begin(), temp2.end());
+        }
+        out.insert(out.end(), temp.begin(), temp.end());
+    }
+
+    return out;
 }
