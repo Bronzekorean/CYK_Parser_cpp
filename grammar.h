@@ -26,9 +26,9 @@ class PCFG {
     std::unordered_map<gSymbol, size_t> normalizer;
     std::unordered_map<gRule, double> log_proabilities;
     std::unordered_map<symbol_list, std::vector<rule_logProba> > reverse_table;
-    std::set<gSymbol> lexicon;
-    std::set<gSymbol> terminals;
-    std::set<gSymbol> non_terminals;
+    symbol_set lexicon;
+    symbol_set terminals;
+    symbol_set non_terminals;
     void update();
 
     PCFG (std::string* corpus, size_t corpus_length, bool verbose, bool to_lower, bool chomsky_normalize);

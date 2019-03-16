@@ -3,9 +3,14 @@
 //
 
 #include "grammar.h"
+#include "grule.h"
+#include "gsymbol.h"
 #include <algorithm>
 #include <ctype.h>
 #include <cmath>
+#include <sstream>
+#include <iterator>
+#include <unordered_map>
 
 
 
@@ -14,9 +19,34 @@ rule_logProba::rule_logProba(gRule rule, double log_proba) {
     this->rule = rule;
 }
 
-rule_list remove_unit_rules(rule_list rules){
+rule_list remove_unit_rules(rule_list rules) {
 
     rule_list out = rule_list();
+    std::unordered_map<gSymbol, symbol_set> nt_to_nt = std::unordered_map<gSymbol, symbol_set>();
+    for (auto it = rules.begin(); it != rules.end(); ++it) {
+        symbol_list expansion = (*it).expansion;
+        while (expansion.size == 1 && !expansion.array[0].is_terminal) {
+            for (auto it2 = rules.begin(); it2 != rules.end(); ++it2) {
+                if ((*it2).gsymbol == expansion.array[0]) {
+                    if (nt_to_nt.find((*it2).gsymbol) == nt_to_nt.end()) nt_to_nt[(*it2).gsymbol] = symbol_set();
+                    nt_to_nt[(*it2).gsymbol].insert((*it).gsymbol);
+                    expansion = (*it2).expansion;
+                }
+            }
+        }
+        out.push_back(gRule((*it).gsymbol, expansion));
+    }
+
+    rule_list temp = rule_list();
+    for (auto it = out.begin(); it != out.end(); ++it) {
+        gSymbol symbol_to_map = (*it).gsymbol;
+        if (nt_to_nt.find(symbol_to_map) != nt_to_nt.end()) {
+            for (const auto &elem : nt_to_nt[symbol_to_map]) {
+                temp.push_back(gRule(elem, (*it).expansion));
+            }
+        }
+    }
+    out.insert(out.end(), temp.begin(), temp.end());
     return out;
 }
 
@@ -124,3 +154,37 @@ void PCFG::update() {
 }
 
 
+
+template<typename Out>
+void split(const std::string &s, char delim, Out result) {
+    std::stringstream ss(s);
+    std::string item;
+    while (std::getline(ss, item, delim)) {
+        *(result++) = item;
+    }
+}
+
+std::vector<std::string> split(const std::string &s, char delim) {
+    std::vector<std::string> elems;
+    split(s, delim, std::back_inserter(elems));
+    return elems;
+}
+
+int_list level_list(std::string line) {
+    int_list out = int_list();
+    int level = 0;
+    std::vector<std::string> symbols = split(line, ' ');
+    out.size = symbols.size();
+    out.array = new int[out.size];
+    for(auto it = symbols.begin(); it != symbols.end(); ++it){
+        out.array[it - symbols.begin()] = level;
+        if((*it).find('(') != std::string::npos ) ++level;
+        else level -= std::count((*it).begin(), (*it).end(), ')');
+    }
+    return out;
+}
+
+rule_list rules_from_line(std::string line, bool chomsky_normalise){
+
+
+}

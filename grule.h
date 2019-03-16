@@ -3,7 +3,6 @@
 //
 
 #include "gsymbol.h"
-#include <vector>
 
 #ifndef CYK_PARSER_GRULE_H
 #define CYK_PARSER_GRULE_H

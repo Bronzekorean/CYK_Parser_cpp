@@ -4,8 +4,6 @@
 
 #include "grule.h"
 
-
-
 namespace std {
     std::size_t hash<gRule>::operator()(const gRule &k) const {
 

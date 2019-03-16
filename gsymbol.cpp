@@ -2,6 +2,8 @@
 // Created by USER on 15/03/2019.
 //
 
+#include <algorithm>
+
 #include "gsymbol.h"
 
 gSymbol::gSymbol(std::string symbol, bool is_terminal) {

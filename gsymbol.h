@@ -4,8 +4,8 @@
 
 #include <xstring>
 #include <unordered_map>
-#include <set>
-
+#include <unordered_set>
+#include <vector>
 
 #ifndef CYK_PARSER_GSYMBOL_H
 #define CYK_PARSER_GSYMBOL_H
@@ -43,5 +43,6 @@ namespace std {
     };
 }
 
+typedef std::unordered_set<gSymbol> symbol_set;
 
 #endif //CYK_PARSER_GSYMBOL_H
